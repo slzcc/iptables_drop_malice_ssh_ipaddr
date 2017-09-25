@@ -1,0 +1,3 @@
+57 23 * * * /iptables_-drop_malice_ssh_ipaddr/iptables_ssh.sh stop 2&>1 /dev/null
+58 23 * * * /usr/bin/lastb | awk '{print $3}' |sort|uniq|egrep -v [a-z] |egrep -v '^$' > /root/error_ssh.txt 2&>1 /dev/null
+59 23 * * * /iptables_-drop_malice_ssh_ipaddr/iptables_ssh.sh start 2&>1 /dev/null
