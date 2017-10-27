@@ -5,10 +5,10 @@ ss=""
 AllPort="0:65535"
 IPT="/sbin/iptables"
 
-for i in `cat malice_ssh_list.txt`; do
+for i in `cat /root/error_ssh.txt|sort|uniq`; do
   let count2+=1
 
-  for j in `cat neglect_ssh_list.txt`; do
+  for j in `cat /root/accept_account.txt|sort|uniq`; do
     if [ "$j" == "$i" ]; then
       echo "Remove $j Rule!"
       break
