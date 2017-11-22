@@ -3,7 +3,7 @@
 count1=`cat ${PWD}/malice_ssh_list.txt | wc -l`
 count2=0
 ss=""
-AllPort="0:65535"
+AllPorts="0:65535"
 IPT="/sbin/iptables"
 
 for i in `cat ${PWD}/malice_ssh_list.txt | sort | uniq`; do
@@ -36,11 +36,11 @@ done
 
 if [ "$1" == "start" ]; then
 
-  $IPT -t filter -A INPUT -p tcp -s ${ss} --sport ${AllPort} --dport 22 -j DROP
+  $IPT -t filter -A INPUT -p tcp -s ${ss} --sport ${AllPorts} --dport 22 -j DROP
 
 elif [ "$1" == "stop" ]; then
 
-  $IPT -t filter -D INPUT -p tcp -s ${ss} --sport ${AllPort} --dport 22 -j DROP
+  $IPT -t filter -D INPUT -p tcp -s ${ss} --sport ${AllPorts} --dport 22 -j DROP
 
 fi
 
