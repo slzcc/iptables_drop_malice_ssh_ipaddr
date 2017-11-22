@@ -6,11 +6,11 @@ ss=""
 AllPort="0:65535"
 IPT="/sbin/iptables"
 
-for i in `cat ${PWD}/error_ssh.txt | sort | uniq`; do
+for i in `cat ${PWD}/malice_ssh_list.txt | sort | uniq`; do
 
   let count2+=1
 
-  for j in `cat ${PWD}/accept_account.txt | sort | uniq`; do
+  for j in `cat ${PWD}/neglect_ssh_list.txt | sort | uniq`; do
 
     if [ "$j" == "$i" ]; then
 
