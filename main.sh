@@ -1,16 +1,16 @@
 #!/bin/bash
 
-count1=`cat ${PWD}/iptables_drop_malice_ssh_ipaddr/malice_ssh_list.txt | wc -l`
+count1=`cat ${PWD}/malice_ssh_list.txt | wc -l`
 count2=0
 ss=""
 AllPort="0:65535"
 IPT="/sbin/iptables"
 
-for i in `cat ${PWD}/iptables_drop_malice_ssh_ipaddr/error_ssh.txt | sort | uniq`; do
+for i in `cat ${PWD}/error_ssh.txt | sort | uniq`; do
 
   let count2+=1
 
-  for j in `cat ${PWD}/iptables_drop_malice_ssh_ipaddr/accept_account.txt | sort | uniq`; do
+  for j in `cat ${PWD}/accept_account.txt | sort | uniq`; do
 
     if [ "$j" == "$i" ]; then
 
