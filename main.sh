@@ -35,7 +35,7 @@ for i in `cat ${PWD}/malice_ssh_list.txt | sort | uniq`; do
 
 done
 
-[[ "$IPList" =~ $suffix ]] && IPList=${IPList&?}
+[[ "$IPList" =~ $suffix ]] && IPList=${IPList%?}
 
 if [ "$1" == "start" ]; then
 
