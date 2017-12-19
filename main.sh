@@ -5,6 +5,7 @@ targetCount=0
 IPList=""
 AllPorts="0:65535"
 IPT="/sbin/iptables"
+suffix="(,$)"
 
 for i in `cat ${PWD}/malice_ssh_list.txt | sort | uniq`; do
 
@@ -34,6 +35,8 @@ for i in `cat ${PWD}/malice_ssh_list.txt | sort | uniq`; do
 
 done
 
+[[ "$IPList" =~ $suffix ]] && IPList=${IPList&?}
+
 if [ "$1" == "start" ]; then
 
   $IPT -t filter -A INPUT -p tcp -s ${IPList} --sport ${AllPorts} --dport 22 -j DROP
@@ -44,4 +47,4 @@ elif [ "$1" == "stop" ]; then
 
 fi
 
-echo $1 Configure iptables!
+[[ `echo $?` == "0" ]] && echo $1 Configure iptables!
