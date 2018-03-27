@@ -3,40 +3,41 @@
 workDir="/root"
 sourceCount=`cat ${workDir}/iptables_drop_malice_ssh_ipaddr/malice_ssh_list.txt | wc -l`
 targetCount=0
-IPList=""
+sourceIPList=`cat ${workDir}/iptables_drop_malice_ssh_ipaddr/malice_ssh_list.txt | sort | uniq`
+AddIPList=""
+DeleteIPList=""
 AllPorts="0:65535"
 IPT="/sbin/iptables"
 suffix="(,$)"
 
-for i in `cat ${workDir}/iptables_drop_malice_ssh_ipaddr/malice_ssh_list.txt | sort | uniq`; do
+for i in ${sourceIPList}; do
 
   let targetCount+=1
 
-  for j in `cat ${workDir}/iptables_drop_malice_ssh_ipaddr/neglect_ssh_list.txt | sort | uniq`; do
-
-    if [ "$j" == "$i" ]; then
-
-      echo "Remove $j Rule!"
-
-      break
-
-    fi
-
-    IPList+="$i",
-
-  done
+  AddIPList+="$i",
 
 done
 
-[[ "$IPList" =~ $suffix ]] && IPList=${IPList%?}
+for j in ${sourceIPList}; do
+
+  DeleteIPList+="$j",
+
+done
+
+[[ "$AddIPList" =~ $suffix ]] && AddIPList=${AddIPList%?}
+
+[[ "$DeleteIPList" =~ $suffix ]] && DeleteIPList=${DeleteIPList%?}
 
 if [ "$1" == "start" ]; then
 
-  $IPT -t filter -A INPUT -p tcp -s ${IPList} --sport ${AllPorts} --dport 22 -j DROP
+  $IPT -t filter -A INPUT -p tcp -s ${DeleteIPList} --sport ${AllPorts} --dport 22 -j ACCEPT
+  $IPT -t filter -A INPUT -p tcp -s ${AddIPList} --sport ${AllPorts} --dport 22 -j DROP
+
 
 elif [ "$1" == "stop" ]; then
 
-  $IPT -t filter -D INPUT -p tcp -s ${IPList} --sport ${AllPorts} --dport 22 -j DROP
+  $IPT -t filter -D INPUT -p tcp -s ${DeleteIPList} --sport ${AllPorts} --dport 22 -j ACCEPT
+  $IPT -t filter -D INPUT -p tcp -s ${AddIPList} --sport ${AllPorts} --dport 22 -j DROP
 
 fi
 
