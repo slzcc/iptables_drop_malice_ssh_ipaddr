@@ -16,28 +16,25 @@ if [ "$1" == "start" ]; then
 	fi
 
 	# check iptable rules black
+	isIPTABLE_RULE=`iptables -t filter -nvL |grep ${IPSET_NAME_WHITE} | wc -l`
+	if [[ $isIPTABLE_RULE != 1 ]]; then
+		iptables -I INPUT -m set --match-set ${IPSET_NAME_WHITE} src -j ACCEPT
+	fi 
+	for j in ${whiteList}; do $IPS add ${IPSET_NAME_WHITE} $j;done
+	
+	# check iptable rules black
 	isIPTABLE_RULE=`iptables -t filter -nvL |grep "^${IPSET_NAME}$" | wc -l`
 	if [[ $isIPTABLE_RULE != 1 ]]; then
 		iptables -I INPUT -m set --match-set ${IPSET_NAME} src -j DROP
 	fi 
-
 	for i in ${blackList}; do $IPS add ${IPSET_NAME} $i;done
-	
-	# check iptable rules black
-	isIPTABLE_RULE=`iptables -t filter -nvL |grep ${IPSET_NAME_WHITE} | wc -l`
-	if [[ $isIPTABLE_RULE != 1 ]]; then
-		iptables -I INPUT -m set ! --match-set ${IPSET_NAME_WHITE} src -j DROP
-	fi 
-
-	for j in ${whiteList}; do $IPS add ${IPSET_NAME_WHITE} $j;done
-
 fi
 
 if [ "$1" == "stop" ]; then
 	# delete iptable rules
+	iptables -D INPUT -m set --match-set ${IPSET_NAME_WHITE} src -j ACCEPT
 	iptables -D INPUT -m set --match-set ${IPSET_NAME} src -j DROP
-	iptables -D INPUT -m set ! --match-set ${IPSET_NAME_WHITE} src -j DROP
-
+	
 	# delete ipset rules objects
 	ipset flush ${IPSET_NAME}
 	ipset flush ${IPSET_NAME_WHITE}
