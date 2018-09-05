@@ -15,6 +15,11 @@ if [ "$1" == "start" ]; then
 		$IPS create ${IPSET_NAME} hash:ip
 	fi
 
+	isIPSET_RULE=`ipset list | grep "^${IPSET_NAME_WHITE}$" | wc -l`
+	if [[ $isIPSET_RULE != 1 ]]; then
+		$IPS create ${IPSET_NAME_WHITE} hash:ip
+	fi
+
 	# check iptable rules black
 	isIPTABLE_RULE=`iptables -t filter -nvL |grep "^${IPSET_NAME_WHITE}$" | wc -l`
 	if [[ $isIPTABLE_RULE != 1 ]]; then
