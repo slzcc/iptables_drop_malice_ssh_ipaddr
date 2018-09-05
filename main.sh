@@ -3,49 +3,48 @@
 workDir="/root"
 whiteList=`cat ${workDir}/iptables_drop_malice_ssh_ipaddr/neglect_ssh_list.txt | sort | uniq`
 blackList=`cat ${workDir}/iptables_drop_malice_ssh_ipaddr/malice_ssh_list.txt | sort | uniq`
-BlackIPList=""
-WhiteIPList=""
-AllPorts="0:65535"
-IPT="/sbin/iptables"
-suffix="(,$)"
+IPS="/sbin/ipset"
+IPSET_NAME="drop_ssh_black"
+IPSET_NAME_WHITE="drop_ssh_white"
 
-for i in ${blackList}; do
-
-  BlackIPList+="$i",
-
-done
-
-for j in ${whiteList}; do
-
-  WhiteIPList+="$j",
-
-done
-
-[[ "$BlackIPList" =~ $suffix ]] && BlackIPList=${BlackIPList%?}
-
-[[ "$WhiteIPList" =~ $suffix ]] && WhiteIPList=${WhiteIPList%?}
 
 if [ "$1" == "start" ]; then
+	# check ipset rules
+	isIPSET_RULE=`ipset list | grep ${IPSET_NAME} | wc -l`
+	if [[ $isIPSET_RULE != "1" ]]; then
+		$IPS create ${IPSET_NAME} hash:ip
+	fi
 
-  $IPT -t filter -A INPUT -p tcp -s ${WhiteIPList} --sport ${AllPorts} --dport 22 -j ACCEPT
-#  $IPT -t filter -A INPUT -p tcp -s ${BlackIPList} --sport ${AllPorts} --dport 22 -j DROP
-for i in ${blackList}; do
+	# check iptable rules black
+	isIPTABLE_RULE=`iptables -t filter -nvL |grep ${IPSET_NAME} | wc -l`
+	if [[ $isIPTABLE_RULE != "1" ]]; then
+		iptables -I INPUT -m set --match-set ${IPSET_NAME} src -j DROP
+	if 
 
-  $IPT -t filter -A INPUT -p tcp -s $i --sport ${AllPorts} --dport 22 -j DROP
+	for i in ${blackList}; do $IPS add ${IPSET_NAME} $i;done
+	
+	# check iptable rules black
+	isIPTABLE_RULE=`iptables -t filter -nvL |grep ${IPSET_NAME_WHITE} | wc -l`
+	if [[ $isIPTABLE_RULE != "1" ]]; then
+		iptables -I INPUT -m set --match-set ${IPSET_NAME_WHITE} src -j DROP
+	if 
 
-done
-
-
-elif [ "$1" == "stop" ]; then
-
-  $IPT -t filter -D INPUT -p tcp -s ${WhiteIPList} --sport ${AllPorts} --dport 22 -j ACCEPT
-#  $IPT -t filter -D INPUT -p tcp -s ${BlackIPList} --sport ${AllPorts} --dport 22 -j DROP
-for i in ${blackList}; do
-
-  $IPT -t filter -D INPUT -p tcp -s $i --sport ${AllPorts} --dport 22 -j DROP
-
-done
+	for j in ${whiteList}; do $IPS add ${IPSET_NAME_WHITE} $j;done
 
 fi
 
-[[ `echo $?` == "0" ]] && echo $1 Configure iptables!
+if [ "$1" == "stop" ]; then
+	# delete iptable rules
+	iptables -D INPUT -m set --match-set ${IPSET_NAME} src -j DROP
+	iptables -D INPUT -m set --match-set ${IPSET_NAME_WHITE} src -j DROP
+
+	# delete ipset rules objects
+	ipset flush ${IPSET_NAME}
+	ipset flush ${IPSET_NAME_WHITE}
+
+	# delete ipset rules
+	ipset destroy ${IPSET_NAME}
+	ipset destroy ${IPSET_NAME_WHITE}
+fi
+
+[[ `echo $?` == "0" ]] && echo $1 Configure IPSet!
