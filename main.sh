@@ -28,13 +28,23 @@ done
 if [ "$1" == "start" ]; then
 
   $IPT -t filter -A INPUT -p tcp -s ${WhiteIPList} --sport ${AllPorts} --dport 22 -j ACCEPT
-  $IPT -t filter -A INPUT -p tcp -s ${BlackIPList} --sport ${AllPorts} --dport 22 -j DROP
+#  $IPT -t filter -A INPUT -p tcp -s ${BlackIPList} --sport ${AllPorts} --dport 22 -j DROP
+for i in ${blackList}; do
+
+  $IPT -t filter -A INPUT -p tcp -s $i --sport ${AllPorts} --dport 22 -j DROP
+
+done
 
 
 elif [ "$1" == "stop" ]; then
 
   $IPT -t filter -D INPUT -p tcp -s ${WhiteIPList} --sport ${AllPorts} --dport 22 -j ACCEPT
-  $IPT -t filter -D INPUT -p tcp -s ${BlackIPList} --sport ${AllPorts} --dport 22 -j DROP
+#  $IPT -t filter -D INPUT -p tcp -s ${BlackIPList} --sport ${AllPorts} --dport 22 -j DROP
+for i in ${blackList}; do
+
+  $IPT -t filter -D INPUT -p tcp -s $i --sport ${AllPorts} --dport 22 -j DROP
+
+done
 
 fi
 
