@@ -11,13 +11,13 @@ IPSET_NAME_WHITE="drop_ssh_white"
 if [ "$1" == "start" ]; then
 	# check ipset rules
 	isIPSET_RULE=`ipset list | grep "^${IPSET_NAME}$" | wc -l`
-	if [[ $isIPSET_RULE != "1" ]]; then
+	if [[ $isIPSET_RULE != 1 ]]; then
 		$IPS create ${IPSET_NAME} hash:ip
 	fi
 
 	# check iptable rules black
 	isIPTABLE_RULE=`iptables -t filter -nvL |grep "^${IPSET_NAME}$" | wc -l`
-	if [[ $isIPTABLE_RULE != "1" ]]; then
+	if [[ $isIPTABLE_RULE != 1 ]]; then
 		iptables -I INPUT -m set --match-set ${IPSET_NAME} src -j DROP
 	fi 
 
@@ -25,7 +25,7 @@ if [ "$1" == "start" ]; then
 	
 	# check iptable rules black
 	isIPTABLE_RULE=`iptables -t filter -nvL |grep ${IPSET_NAME_WHITE} | wc -l`
-	if [[ $isIPTABLE_RULE != "1" ]]; then
+	if [[ $isIPTABLE_RULE != 1 ]]; then
 		iptables -I INPUT -m set ! --match-set ${IPSET_NAME_WHITE} src -j DROP
 	fi 
 
